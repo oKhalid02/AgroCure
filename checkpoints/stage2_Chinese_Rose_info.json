@@ -1,0 +1,13 @@
+{
+  "plant": "Chinese Rose",
+  "disease_labels": [
+    "Chinese Rose | Gray Mold",
+    "Chinese Rose | Powdery Mildew"
+  ],
+  "disease_to_idx": {
+    "Chinese Rose | Gray Mold": 0,
+    "Chinese Rose | Powdery Mildew": 1
+  },
+  "best_val_loss": 0.009022953920066357,
+  "best_epoch": 4
+}

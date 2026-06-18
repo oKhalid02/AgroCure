@@ -1,0 +1,19 @@
+{
+  "plant": "Tomato",
+  "disease_labels": [
+    "Tomato | Bacterial Spot",
+    "Tomato | Blight",
+    "Tomato | Leaf Mold",
+    "Tomato | Septoria Leaf Spot",
+    "Tomato | Viral Disease"
+  ],
+  "disease_to_idx": {
+    "Tomato | Bacterial Spot": 0,
+    "Tomato | Blight": 1,
+    "Tomato | Leaf Mold": 2,
+    "Tomato | Septoria Leaf Spot": 3,
+    "Tomato | Viral Disease": 4
+  },
+  "best_val_loss": 0.1743560804721506,
+  "best_epoch": 30
+}
