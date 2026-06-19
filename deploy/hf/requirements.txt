@@ -1,0 +1,12 @@
+# CPU-only PyTorch keeps the image small and runs on free HF hardware.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.2
+torchvision==0.17.2
+fastapi==0.111.0
+uvicorn==0.29.0
+python-multipart==0.0.9
+pillow>=10.0.0
+numpy>=1.24.0,<2
+scikit-learn>=1.0.0
+python-dotenv>=1.0.0
+openai>=1.30.0
