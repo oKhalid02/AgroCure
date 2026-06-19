@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _load() async {
-    final user = await AuthService.currentUser();
+    final user = AuthService.currentUser;
     final history = await HistoryService.load();
     if (!mounted) return;
     setState(() {

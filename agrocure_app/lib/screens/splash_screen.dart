@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     final seenOnboarding = await SettingsService.onboardingSeen();
-    final loggedIn = await AuthService.isLoggedIn();
+    final loggedIn = AuthService.isLoggedIn;
     if (!mounted) return;
 
     final Widget next;

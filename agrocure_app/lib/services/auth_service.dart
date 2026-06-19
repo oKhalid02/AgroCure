@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthUser {
   final String name;
@@ -13,43 +13,50 @@ class AuthUser {
   }
 }
 
-/// Local authentication. Persists a session in SharedPreferences.
+/// Authentication backed by Supabase Auth.
 ///
-/// This is a self-contained implementation so the full flow works offline.
-/// To move to real cloud auth, swap the bodies of these methods for Firebase
-/// Auth calls — the rest of the app talks only to this interface.
+/// Sessions persist automatically across launches. The app talks only to this
+/// interface, so the backend can be swapped without touching the screens.
 class AuthService {
-  static const _kLoggedIn = 'auth_logged_in';
-  static const _kName = 'auth_name';
-  static const _kEmail = 'auth_email';
+  static SupabaseClient get _client => Supabase.instance.client;
 
-  static Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_kLoggedIn) ?? false;
-  }
+  static bool get isLoggedIn => _client.auth.currentSession != null;
 
-  static Future<AuthUser?> currentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!(prefs.getBool(_kLoggedIn) ?? false)) return null;
+  static AuthUser? get currentUser {
+    final u = _client.auth.currentUser;
+    if (u == null) return null;
+    final meta = u.userMetadata;
+    final name = (meta?['name'] as String?)?.trim();
     return AuthUser(
-      name: prefs.getString(_kName) ?? 'Guest',
-      email: prefs.getString(_kEmail) ?? '',
+      name: (name != null && name.isNotEmpty)
+          ? name
+          : (u.email?.split('@').first ?? 'User'),
+      email: u.email ?? '',
     );
   }
 
-  static Future<AuthUser> signIn({
+  /// Creates an account. With email-confirmation disabled (recommended for the
+  /// prototype) the user is signed in immediately and [isLoggedIn] becomes true.
+  static Future<void> signUp({
     required String name,
     required String email,
+    required String password,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kLoggedIn, true);
-    await prefs.setString(_kName, name);
-    await prefs.setString(_kEmail, email);
-    return AuthUser(name: name, email: email);
+    await _client.auth.signUp(
+      email: email,
+      password: password,
+      data: {'name': name},
+    );
+  }
+
+  static Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {
+    await _client.auth.signInWithPassword(email: email, password: password);
   }
 
   static Future<void> signOut() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kLoggedIn, false);
+    await _client.auth.signOut();
   }
 }

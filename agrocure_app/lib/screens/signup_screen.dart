@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/botanica_theme.dart';
 import '../services/auth_service.dart';
 import '../widgets/ambient_background.dart';
@@ -27,23 +28,47 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  void _snack(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   Future<void> _create() async {
     final name = _name.text.trim();
     final email = _email.text.trim();
-    if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your name and email')),
-      );
+    final password = _password.text;
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      _snack('Fill in your name, email and password');
+      return;
+    }
+    if (password.length < 6) {
+      _snack('Password must be at least 6 characters');
       return;
     }
     setState(() => _busy = true);
-    await AuthService.signIn(name: name, email: email);
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (_) => false,
-    );
+    try {
+      await AuthService.signUp(name: name, email: email, password: password);
+      if (!mounted) return;
+      if (AuthService.isLoggedIn) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (_) => false,
+        );
+      } else {
+        setState(() => _busy = false);
+        _snack('Account created — check your email to confirm, then sign in.');
+        Navigator.pop(context);
+      }
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _snack(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _snack('Something went wrong. Please try again.');
+    }
   }
 
   @override

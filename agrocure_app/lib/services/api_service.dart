@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 import '../models/prediction.dart';
 import '../models/chat_message.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  /// Resolved from --dart-define=API_URL (defaults to localhost in dev).
+  static const String baseUrl = ApiConfig.baseUrl;
 
   static Future<bool> checkHealth() async {
     try {

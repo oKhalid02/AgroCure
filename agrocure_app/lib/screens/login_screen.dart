@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/botanica_theme.dart';
 import '../services/auth_service.dart';
 import '../widgets/seedling_logo.dart';
@@ -28,27 +29,36 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _go(String name, String email) async {
-    setState(() => _busy = true);
-    await AuthService.signIn(name: name, email: email);
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (_) => false,
-    );
+  void _snack(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  void _emailSignIn() {
+  Future<void> _signIn() async {
     final email = _email.text.trim();
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email to continue')),
-      );
+    final password = _password.text;
+    if (email.isEmpty || password.isEmpty) {
+      _snack('Enter your email and password');
       return;
     }
-    final name = email.split('@').first;
-    _go(name[0].toUpperCase() + name.substring(1), email);
+    setState(() => _busy = true);
+    try {
+      await AuthService.signIn(email: email, password: password);
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (_) => false,
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _snack(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      _snack('Something went wrong. Please try again.');
+    }
   }
 
   @override
@@ -98,16 +108,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 18),
                 PrimaryButton(
                   label: _busy ? 'Signing in…' : 'Sign in',
-                  onTap: _busy ? null : _emailSignIn,
+                  onTap: _busy ? null : _signIn,
                 ),
-                const SizedBox(height: 22),
-                _divider(c),
-                const SizedBox(height: 22),
-                _socialButton(c, Icons.g_mobiledata, 'Continue with Google',
-                    () => _go('Khaled', 'khaled.alamro2002@gmail.com')),
-                const SizedBox(height: 12),
-                _socialButton(c, Icons.apple, 'Continue with Apple',
-                    () => _go('Khaled', 'khaled@icloud.com')),
                 const SizedBox(height: 28),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -136,41 +138,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _divider(BotanicaColors c) {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: c.line)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('or', style: TextStyle(color: c.ink3, fontSize: 12)),
-        ),
-        Expanded(child: Divider(color: c.line)),
-      ],
-    );
-  }
-
-  Widget _socialButton(
-      BotanicaColors c, IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: c.surf,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: c.line),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: c.ink, size: 22),
-            const SizedBox(width: 10),
-            Text(label,
-                style: TextStyle(
-                    color: c.ink, fontSize: 14, fontWeight: FontWeight.w500)),
-          ],
-        ),
-      ),
-    );
-  }
 }

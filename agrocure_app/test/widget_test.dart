@@ -1,20 +1,26 @@
-// Smoke test: the app boots to the splash, then routes onward.
+// Smoke test: the login screen renders its core UI.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import 'package:agrocure_app/main.dart';
+import 'package:agrocure_app/theme/botanica_theme.dart';
+import 'package:agrocure_app/screens/login_screen.dart';
 
 void main() {
-  testWidgets('boots to splash and into onboarding', (tester) async {
-    SharedPreferences.setMockInitialValues({});
+  setUp(() {
+    // Avoid network font fetches (and their timers) during the test.
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
 
-    await tester.pumpWidget(const AgroCureApp());
-    expect(find.text('AgroCure'), findsOneWidget); // splash
+  testWidgets('login screen renders', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: BotanicaTheme.light, home: const LoginScreen()),
+    );
+    // Let entry animations finish so no timers stay pending.
+    await tester.pump(const Duration(seconds: 1));
 
-    await tester.pump(const Duration(milliseconds: 1800)); // splash timer fires
-    await tester.pump(const Duration(milliseconds: 600)); // fade transition
-
-    expect(find.text('Snap a leaf'), findsOneWidget); // onboarding slide 1
+    expect(find.text('Welcome back'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
   });
 }
