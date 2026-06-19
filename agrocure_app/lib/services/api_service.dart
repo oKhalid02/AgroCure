@@ -1,6 +1,7 @@
-import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../config.dart';
 import '../models/prediction.dart';
 import '../models/chat_message.dart';
@@ -20,28 +21,33 @@ class ApiService {
     }
   }
 
-  static Future<Prediction> predict(File imageFile) async {
+  /// Sends raw image bytes to the model. Works on web, iOS and Android.
+  static Future<Prediction> predict(Uint8List bytes) async {
     final request = http.MultipartRequest(
       'POST',
       Uri.parse('$baseUrl/predict'),
     );
     request.files.add(
-      await http.MultipartFile.fromPath('file', imageFile.path),
+      http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: 'leaf.jpg',
+        contentType: MediaType('image', 'jpeg'),
+      ),
     );
     final streamedResponse =
-        await request.send().timeout(const Duration(seconds: 30));
+        await request.send().timeout(const Duration(seconds: 60));
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      return Prediction.fromJson(json, imageFile.path);
+      return Prediction.fromJson(json, '');
     } else {
       throw Exception('Prediction failed: ${response.body}');
     }
   }
 
-  /// Sage — the AI companion. Sends the conversation (and the optional
-  /// diagnosis context) to the backend, which calls OpenAI.
+  /// Sage — the AI companion.
   static Future<String> chat({
     required List<ChatMessage> messages,
     String? plant,

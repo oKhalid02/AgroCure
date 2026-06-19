@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/botanica_theme.dart';
 import '../models/prediction.dart';
@@ -102,7 +101,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _item(BotanicaColors c, Prediction p) {
     final healthy = p.disease.toLowerCase().contains('healthy');
     final color = healthy ? c.sage : c.terra;
-    final file = File(p.imagePath);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -114,18 +112,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(13),
-            child: SizedBox(
-              width: 46,
-              height: 46,
-              child: file.existsSync()
-                  ? Image.file(file, fit: BoxFit.cover)
-                  : Container(
-                      color: c.surf2,
-                      child: Icon(Icons.eco_outlined, color: color, size: 20),
-                    ),
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: c.surf2,
+              borderRadius: BorderRadius.circular(13),
             ),
+            child: Icon(Icons.eco_outlined, color: color, size: 20),
           ),
           const SizedBox(width: 13),
           Expanded(

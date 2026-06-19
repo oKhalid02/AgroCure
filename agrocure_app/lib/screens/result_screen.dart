@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/botanica_theme.dart';
@@ -12,10 +12,10 @@ import 'chat_screen.dart';
 
 class ResultScreen extends StatefulWidget {
   final Prediction prediction;
-  final File imageFile;
+  final Uint8List imageBytes;
 
   const ResultScreen(
-      {super.key, required this.prediction, required this.imageFile});
+      {super.key, required this.prediction, required this.imageBytes});
 
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -50,8 +50,8 @@ class _ResultScreenState extends State<ResultScreen> {
               children: [
                 ClipPath(
                   clipper: ArchClipper(),
-                  child: Image.file(
-                    widget.imageFile,
+                  child: Image.memory(
+                    widget.imageBytes,
                     width: double.infinity,
                     height: 230,
                     fit: BoxFit.cover,

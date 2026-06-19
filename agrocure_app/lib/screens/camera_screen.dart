@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/botanica_theme.dart';
@@ -54,13 +53,14 @@ class _CameraScreenState extends State<CameraScreen>
     });
 
     try {
-      final file = File(picked.path);
-      final result = await ApiService.predict(file);
+      final bytes = await picked.readAsBytes();
+      final result = await ApiService.predict(bytes);
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (_) => ResultScreen(prediction: result, imageFile: file)),
+            builder: (_) =>
+                ResultScreen(prediction: result, imageBytes: bytes)),
       );
     } catch (e) {
       setState(() {
