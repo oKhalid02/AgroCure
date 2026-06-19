@@ -35,6 +35,14 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    // Force CanvasKit: skwasm needs cross-origin isolation headers the static
+    // host doesn't send, which white-screens on iOS Safari.
+    _flutter.loader.load({
+      config: { renderer: "canvaskit" },
+    });
+  </script>
 </body>
 </html>
