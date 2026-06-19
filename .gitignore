@@ -6,3 +6,8 @@ checkpoints/*.pth
 *.zip
 .DS_Store
 /tmp/
+
+# Secrets — never commit
+.env
+*.env
+!.env.example
