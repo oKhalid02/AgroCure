@@ -11,3 +11,6 @@ checkpoints/*.pth
 .env
 *.env
 !.env.example
+
+# Hugging Face Space deploy working copy
+.hf-space/
